@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Password Strength Checker</title>
+  <style>
+    :root {
+      --bg: #f4f7f5;
+      --card: #ffffff;
+      --text: #1f2933;
+      --muted: #64748b;
+      --mint: #a7f3d0;
+      --mint-dark: #047857;
+      --border: #dbe4e0;
+      --weak: #ef4444;
+      --medium: #f59e0b;
+      --strong: #10b981;
+      --shadow: 0 20px 45px rgba(15, 23, 42, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #e8f8ef, #f7faf9);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 760px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #064e3b, #047857);
+      color: white;
+      padding: 34px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      line-height: 1.05;
+      margin-bottom: 12px;
+    }
+
+    .hero p {
+      color: #d1fae5;
+      font-size: 1rem;
+      max-width: 560px;
+      line-height: 1.6;
+    }
+
+    .content {
+      padding: 34px;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .input-wrap {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    input {
+      flex: 1;
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      font-size: 1rem;
+      outline: none;
+      transition: 0.2s ease;
+    }
+
+    input:focus {
+      border-color: var(--mint-dark);
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+    }
+
+    button {
+      border: none;
+      border-radius: 16px;
+      padding: 0 18px;
+      background: var(--mint-dark);
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      background: #065f46;
+    }
+
+    .meter {
+      height: 14px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+
+    .meter-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--weak);
+      transition: 0.3s ease;
+      border-radius: 999px;
+    }
+
+    .strength-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .strength-label {
+      font-size: 1.2rem;
+      font-weight: 800;
+    }
+
+    .score {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .checks {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 26px;
+    }
+
+    .check {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      color: var(--muted);
+      background: #fbfdfc;
+      transition: 0.2s ease;
+    }
+
+    .check.valid {
+      border-color: rgba(16, 185, 129, 0.35);
+      background: #ecfdf5;
+      color: #065f46;
+      font-weight: 700;
+    }
+
+    .feedback {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .feedback h2 {
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+    }
+
+    .feedback ul {
+      padding-left: 20px;
+      color: var(--muted);
+    }
+
+    .footer-note {
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 620px) {
+      .input-wrap {
+        flex-direction: column;
+      }
+
+      button {
+        padding: 14px;
+      }
+
+      .checks {
+        grid-template-columns: 1fr;
+      }
+
+      .hero,
+      .content {
+        padding: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="hero">
+      <span class="badge">Cybersecurity Mini Project</span>
+      <h1>Password Strength Checker</h1>
+      <p>
+        Test password strength using length, character variety, and common security rules. This tool does not store or send passwords anywhere.
+      </p>
+    </section>
+
+    <section class="content">
+      <label for="password">Enter a password to check</label>
+      <div class="input-wrap">
+        <input id="password" type="password" placeholder="Type your password..." autocomplete="off" />
+        <button id="togglePassword">Show</button>
+      </div>
+
+      <div class="meter" aria-label="Password strength meter">
+        <div class="meter-fill" id="meterFill"></div>
+      </div>
+
+      <div class="strength-row">
+        <p class="strength-label" id="strengthLabel">Strength: Not checked</p>
+        <p class="score" id="scoreText">Score: 0 / 6</p>
+      </div>
+
+      <div class="checks">
+        <div class="check" id="lengthCheck">At least 12 characters</div>
+        <div class="check" id="upperCheck">Includes uppercase letters</div>
+        <div class="check" id="lowerCheck">Includes lowercase letters</div>
+        <div class="check" id="numberCheck">Includes numbers</div>
+        <div class="check" id="symbolCheck">Includes symbols</div>
+        <div class="check" id="commonCheck">Avoids common passwords</div>
+      </div>
+
+      <div class="feedback">
+        <h2>Security Feedback</h2>
+        <ul id="feedbackList">
+          <li>Start typing to receive password improvement tips.</li>
+        </ul>
+      </div>
+
+      <p class="footer-note">
+        Recruiter note: This project demonstrates JavaScript logic, DOM manipulation, UI design, and basic cybersecurity awareness.
+      </p>
+    </section>
+  </main>
+
+  <script>
+    const passwordInput = document.getElementById("password");
+    const togglePassword = document.getElementById("togglePassword");
+    const meterFill = document.getElementById("meterFill");
+    const strengthLabel = document.getElementById("strengthLabel");
+    const scoreText = document.getElementById("scoreText");
+    const feedbackList = document.getElementById("feedbackList");
+
+    const checks = {
+      length: document.getElementById("lengthCheck"),
+      upper: document.getElementById("upperCheck"),
+      lower: document.getElementById("lowerCheck"),
+      number: document.getElementById("numberCheck"),
+      symbol: document.getElementById("symbolCheck"),
+      common: document.getElementById("commonCheck")
+    };
+
+    const commonPasswords = [
+      "password",
+      "password123",
+      "123456",
+      "123456789",
+      "qwerty",
+      "letmein",
+      "admin",
+      "welcome",
+      "iloveyou"
+    ];
+
+    function updateCheck(element, isValid) {
+      element.classList.toggle("valid", isValid);
+    }
+
+    function checkPasswordStrength(password) {
+      const rules = {
+        length: password.length >= 12,
+        upper: /[A-Z]/.test(password),
+        lower: /[a-z]/.test(password),
+        number: /[0-9]/.test(password),
+        symbol: /[^A-Za-z0-9]/.test(password),
+        common: password.length > 0 && !commonPasswords.includes(password.toLowerCase())
+      };
+
+      let score = Object.values(rules).filter(Boolean).length;
+
+      updateCheck(checks.length, rules.length);
+      updateCheck(checks.upper, rules.upper);
+      updateCheck(checks.lower, rules.lower);
+      updateCheck(checks.number, rules.number);
+      updateCheck(checks.symbol, rules.symbol);
+      updateCheck(checks.common, rules.common);
+
+      updateMeter(score);
+      updateFeedback(password, rules, score);
+    }
+
+    function updateMeter(score) {
+      const percentage = (score / 6) * 100;
+      meterFill.style.width = `${percentage}%`;
+      scoreText.textContent = `Score: ${score} / 6`;
+
+      if (score <= 2) {
+        meterFill.style.background = "var(--weak)";
+        strengthLabel.textContent = "Strength: Weak";
+      } else if (score <= 4) {
+        meterFill.style.background = "var(--medium)";
+        strengthLabel.textContent = "Strength: Medium";
+      } else {
+        meterFill.style.background = "var(--strong)";
+        strengthLabel.textContent = "Strength: Strong";
+      }
+    }
+
+    function updateFeedback(password, rules, score) {
+      const tips = [];
+
+      if (!password) {
+        tips.push("Start typing to receive password improvement tips.");
+      } else {
+        if (!rules.length) tips.push("Use at least 12 characters for better protection.");
+        if (!rules.upper) tips.push("Add at least one uppercase letter.");
+        if (!rules.lower) tips.push("Add at least one lowercase letter.");
+        if (!rules.number) tips.push("Add at least one number.");
+        if (!rules.symbol) tips.push("Add a symbol such as !, @, #, or $. ");
+        if (!rules.common) tips.push("Avoid common passwords that attackers can easily guess.");
+        if (score === 6) tips.push("Great job! This password follows strong basic security practices.");
+      }
+
+      feedbackList.innerHTML = tips.map(tip => `<li>${tip}</li>`).join("");
+    }
+
+    passwordInput.addEventListener("input", () => {
+      checkPasswordStrength(passwordInput.value);
+    });
+
+    togglePassword.addEventListener("click", () => {
+      const isPassword = passwordInput.type === "password";
+      passwordInput.type = isPassword ? "text" : "password";
+      togglePassword.textContent = isPassword ? "Hide" : "Show";
+    });
+  </script>
+</body>
+</html>
